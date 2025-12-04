@@ -1,3 +1,14 @@
+# app/main.py
+# Ensure werkzeug exposes __version__ so Flask test helpers (and other code) don't fail
+try:
+    import werkzeug
+    if not hasattr(werkzeug, "__version__"):
+        # provide a reasonable default version string
+        werkzeug.__version__ = "2.3.0"
+except Exception:
+    # if werkzeug import fails for any reason, ignore and let Flask raise later
+    pass
+
 from flask import Flask
 from .routes import bp
 import logging
@@ -20,3 +31,4 @@ def create_app():
 
 if __name__ == '__main__':
     create_app().run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
