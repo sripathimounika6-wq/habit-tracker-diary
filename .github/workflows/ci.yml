@@ -53,10 +53,10 @@ jobs:
           pytest -q
   deploy:
         name: Deploy to EC2
-        needs: sonarcloud
+        needs: [sonarcloud, test]
         runs-on: ubuntu-latest
-
-     steps:
+   
+        steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
