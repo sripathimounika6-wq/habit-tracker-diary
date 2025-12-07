@@ -1,11 +1,13 @@
 from pydantic import BaseModel, ValidationError as PydanticError
 from typing import Optional
 
+
 class HabitSchema(BaseModel):
     """
     Schema for creating a new habit/diary entry.
     title is required when creating a new item.
     """
+
     title: str
     frequency: Optional[str] = "daily"
     done: Optional[bool] = False
@@ -25,6 +27,7 @@ class UpdateHabitSchema(BaseModel):
     Schema for partial updates. All fields are optional so you can PATCH/PUT
     only the fields you want to change (e.g. {'done': True}).
     """
+
     title: Optional[str] = None
     frequency: Optional[str] = None
     done: Optional[bool] = None
