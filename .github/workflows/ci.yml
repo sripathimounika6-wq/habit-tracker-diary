@@ -56,39 +56,45 @@ jobs:
   # -------------------------
   # 2) SonarQube / SonarCloud
   # -------------------------
-  sonar_scan:
-    needs: build_and_test
-    runs-on: ubuntu-latest
+    sonar_scan:
+        needs: build_and_test
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+        steps:
+          - name: Checkout code
+            uses: actions/checkout@v4
 
-      - name: Set up JDK (required by Sonar)
-        uses: actions/setup-java@v4
-        with:
-          distribution: "temurin"
-          java-version: "17"
+          - name: Set up JDK (required by Sonar)
+            uses: actions/setup-java@v4
+            with:
+              distribution: "temurin"
+              java-version: "17"
 
-      - name: Cache Sonar packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
+          - name: Cache Sonar packages
+            uses: actions/cache@v4
+            with:
+              path: ~/.sonar/cache
+              key: ${{ runner.os }}-sonar
+              restore-keys: ${{ runner.os }}-sonar
+ 
+          - name: SonarCloud Scan
+            uses: SonarSource/sonarcloud-github-action@master
+            with:
+        projectBaseDir: .
+        args: >
+          -Dsonar.projectKey=sripathimounika6-wq_habit-tracker-diary
+          -Dsonar.organization=YOUR_ORG_KEY
+           env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: https://sonarcloud.io
 
-      - name: SonarQube scan
-        uses: SonarSource/sonarqube-scan-action@v6
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }} # e.g. https://sonarcloud.io
+          - name:SonarQube Quality Gate
+            uses:SonarSource/sonarqube-quality-gate-action@v1.1.0
+           env:
+               SONAR_TOKEN:${{ secrets.SONAR_TOKEN }}
+            with:
+        scanMetadataReportFile: .scannerwork/report-task.txt
 
-      - name: SonarQube Quality Gate
-        uses: SonarSource/sonarqube-quality-gate-action@v1.1.0
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          scanMetadataReportFile: .scannerwork/report-task.txt
 
   # -------------------------
   # 3) Deploy to EC2
@@ -124,3 +130,4 @@ jobs:
             python -m pip install --upgrade pip
             if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
             sudo systemctl restart habit-tracker.service
+
