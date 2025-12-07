@@ -1,22 +1,31 @@
-try:
-    import werkzeug
-    if not hasattr(werkzeug, "__version__"):
-        # provide a reasonable default version string
-        werkzeug.__version__ = "2.3.0"
-except Exception:
-    # if werkzeug import fails for any reason, ignore and let Flask raise later
-    pass
-
-
-from flask import Flask
-from .routes import bp
+"""Application entry point for the habit tracker API."""
 import logging
 import os
 
+try:
+    import werkzeug
+
+    if not hasattr(werkzeug, "__version__"):
+        # provide a reasonable default version string
+        werkzeug.__version__ = "2.3.0"
+except Exception as exc:
+    # Log the problem but let Flask handle any real failure later
+    logging.getLogger(__name__).warning(
+        "Failed to set werkzeug.__version__: %s", exc,
+    )
+
+from flask import Flask
+from .routes import bp
+
 
 def create_app():
+    """Create and configure the Flask application."""
     logging.basicConfig(level=logging.INFO)
-    app = Flask(__name__, static_folder="../frontend", static_url_path="/")
+    app = Flask(
+        __name__,
+        static_folder="../frontend",
+        static_url_path="/",
+    )
     app.register_blueprint(bp, url_prefix="/api")
 
     @app.route("/")
@@ -31,4 +40,9 @@ def create_app():
 
 
 if __name__ == "__main__":
-    create_app().run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    port = int(os.environ.get("PORT", 5000))
+    # Binding to all interfaces is intentional for container/EC2 deployments.
+    create_app().run(
+        host="0.0.0.0",  # nosec B104
+        port=port,
+    )
