@@ -52,11 +52,11 @@ jobs:
         run: |
           pytest -q
   deploy:
-    name: Deploy to EC2
-    needs: sonarcloud
-    runs-on: ubuntu-latest
+        name: Deploy to EC2
+        needs: sonarcloud
+        runs-on: ubuntu-latest
 
-    steps:
+     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
