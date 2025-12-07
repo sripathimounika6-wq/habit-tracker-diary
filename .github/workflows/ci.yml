@@ -53,7 +53,7 @@ jobs:
           pytest -q
   deploy:
     name: Deploy to EC2
-    needs: sonarcloud    
+    needs: sonarcloud
     runs-on: ubuntu-latest
 
     steps:
