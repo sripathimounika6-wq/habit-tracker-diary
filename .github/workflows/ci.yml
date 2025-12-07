@@ -45,7 +45,7 @@ jobs:
       - name: Run flake8
         run: |
           pip install flake8
-          flake8 .
+          flake8 app tests
 
       - name: Run Bandit (security scan)
         run: |
