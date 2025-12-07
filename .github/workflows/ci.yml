@@ -34,10 +34,13 @@ jobs:
         run: |
           if [ -d tests ] || [ -f pytest.ini ]; then
             pip install pytest
+            # Make sure the repo root (where "app" lives) is on PYTHONPATH
+            export PYTHONPATH="$PYTHONPATH:$(pwd)"
             pytest
           else
             echo "No tests folder, skipping tests."
           fi
+
 
       - name: Run flake8
         run: |
