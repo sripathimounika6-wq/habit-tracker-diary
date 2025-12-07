@@ -131,4 +131,21 @@ jobs:
             if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
             sudo systemctl restart habit-tracker.service
 
+# -------------------------
+# 3) OWASP ZAP Baseline Scan
+# -------------------------
+zap_scan:
+  needs: sonar_scan
+  runs-on: ubuntu-latest
+
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run OWASP ZAP Baseline Scan
+      uses: zaproxy/action-baseline@v0.12.0
+      with:
+        target: ${{ secrets.ZAP_TARGET_URL }}
+        fail_action: true
+
 
