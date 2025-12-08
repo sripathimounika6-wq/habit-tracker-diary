@@ -67,26 +67,12 @@ jobs:
           distribution: "temurin"
           java-version: "17"
 
-      - name: Cache Sonar packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-
-      # sonar-project.properties in your repo will provide projectKey & org
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+      - name: SonarQube scan
+        uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}   # or just https://sonarcloud.io
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-      - name: SonarCloud Quality Gate
-        uses: SonarSource/sonarqube-quality-gate-action@v1.1.0
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          scanMetadataReportFile: .scannerwork/report-task.txt
 
   # -------------------------
   # 3) Deploy to EC2
