@@ -34,13 +34,11 @@ jobs:
         run: |
           if [ -d tests ] || [ -f pytest.ini ]; then
             pip install pytest
-            # Make sure the repo root (where "app" lives) is on PYTHONPATH
             export PYTHONPATH="$PYTHONPATH:$(pwd)"
             pytest
           else
             echo "No tests folder, skipping tests."
           fi
-
 
       - name: Run flake8
         run: |
@@ -52,49 +50,43 @@ jobs:
           pip install bandit
           bandit -r app
 
-
   # -------------------------
-  # 2) SonarQube / SonarCloud
+  # 2) SonarCloud
   # -------------------------
-    sonar_scan:
-      needs: build_and_test
-      runs-on: ubuntu-latest
+  sonar_scan:
+    needs: build_and_test
+    runs-on: ubuntu-latest
 
-        steps:
-          - name: Checkout code
-            uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-          - name: Set up JDK (required by Sonar)
-            uses: actions/setup-java@v4
-            with:
-              distribution: "temurin"
-              java-version: "17"
+      - name: Set up JDK (required by Sonar)
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
 
-          - name: Cache Sonar packages
-            uses: actions/cache@v4
-            with:
-              path: ~/.sonar/cache
-              key: ${{ runner.os }}-sonar
-              restore-keys: ${{ runner.os }}-sonar
- 
-          - name: SonarCloud Scan
-            uses: SonarSource/sonarcloud-github-action@master
-            with:
-        projectBaseDir: .
-        args: >
-          -Dsonar.projectKey=sripathimounika6-wq_habit-tracker-diary
-          -Dsonar.organization=YOUR_ORG_KEY
-           env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: https://sonarcloud.io
+      - name: Cache Sonar packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
 
-          - name:SonarQube Quality Gate
-            uses:SonarSource/sonarqube-quality-gate-action@v1.1.0
-           env:
-               SONAR_TOKEN:${{ secrets.SONAR_TOKEN }}
-            with:
-        scanMetadataReportFile: .scannerwork/report-task.txt
+      # sonar-project.properties in your repo will provide projectKey & org
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}   # or just https://sonarcloud.io
 
+      - name: SonarCloud Quality Gate
+        uses: SonarSource/sonarqube-quality-gate-action@v1.1.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          scanMetadataReportFile: .scannerwork/report-task.txt
 
   # -------------------------
   # 3) Deploy to EC2
@@ -111,9 +103,9 @@ jobs:
       - name: Copy project to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.EC2_HOST }}        # EC2 public IP / DNS
-          username: ${{ secrets.EC2_USER }}    # usually ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}      # private key text
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
           source: "."
           target: "/home/ubuntu/habit-tracker-diary"
 
@@ -131,21 +123,16 @@ jobs:
             if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
             sudo systemctl restart habit-tracker.service
 
-# -------------------------
-# 3) OWASP ZAP Baseline Scan
-# -------------------------
-zap_scan:
-  needs: sonar_scan
-  runs-on: ubuntu-latest
+  # -------------------------
+  # 4) OWASP ZAP Baseline Scan
+  # -------------------------
+  zap_scan:
+    needs: deploy       # run ZAP after deploy; change to sonar_scan if you prefer
+    runs-on: ubuntu-latest
 
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Run OWASP ZAP Baseline Scan
-      uses: zaproxy/action-baseline@v0.12.0
-      with:
-        target: ${{ secrets.ZAP_TARGET_URL }}
-        fail_action: true
-
-
+    steps:
+      - name: Run OWASP ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: ${{ secrets.ZAP_TARGET_URL }}   # e.g. http://YOUR-EC2-IP:5000
+          fail_action: true
