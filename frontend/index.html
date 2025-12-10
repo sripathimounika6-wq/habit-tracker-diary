@@ -99,7 +99,7 @@
   }
 
   function fmtDate(ts){
-         const d=new Date(ts*1000); return isNaN(d.getTime()) ? '' : d.toLocaleString();
+         const d=new Date(ts*1000); return Number.isNaN(d.getTime()) ? '' : d.toLocaleString();
 }
 
   async function load(){
@@ -178,7 +178,7 @@
     }catch(e){ alert('Clear failed: '+e.message); }
   }
 
-  load();
+  await load();
   </script>
 </body>
 </html>
