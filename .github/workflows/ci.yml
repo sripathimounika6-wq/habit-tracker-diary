@@ -68,7 +68,8 @@ jobs:
           java-version: "17"
 
       - name: SonarQube scan
-        uses: SonarSource/sonarqube-scan-action@v6
+        uses: SonarSource/sonarqube-scan-action@408b6b3f8e7b9d6e85c8a58dc844ad4d925d646e
+
         with:
           args: >
             -Dsonar.qualitygate.wait=false
@@ -89,7 +90,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Copy project to EC2
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@b01c36ae2686f7948a6db4c44f589900e63cc3da
+
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
@@ -98,7 +100,8 @@ jobs:
           target: "/home/ubuntu/habit-tracker-diary"
 
       - name: Deploy and restart app on EC2
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@d9c1c7c7d393f82e7fbc6a01270f8ccf0f699a0c
+
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
@@ -123,7 +126,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run OWASP ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.12.0
+        uses: zaproxy/action-baseline@6afcfbe002a550e076da66736c43165ee4cd0639
+
         continue-on-error: true
         with:
           target: ${{ secrets.ZAP_TARGET_URL }}

@@ -1,12 +1,20 @@
 FROM python:3.11-slim
 
+# Create a non-root user
+RUN addgroup --system appgroup && adduser --system appuser --ingroup appgroup
+
 WORKDIR /app
+
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-ENV FLASK_APP=app.main:create_app
-EXPOSE 5000
+# Change permissions so non-root can access
+RUN chown -R appuser:appgroup /app
 
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app.main:create_app()"]
+# Switch to non-root user
+USER appuser
+
+# Start your app
+CMD ["python", "app/main.py"]

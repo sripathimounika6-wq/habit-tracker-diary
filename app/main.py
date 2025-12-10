@@ -26,6 +26,8 @@ def create_app():
         static_folder="../frontend",
         static_url_path="/",
     )
+    # CSRF not required: our API uses no cookies or forms, only stateless JSON requests
+
     app.register_blueprint(bp, url_prefix="/api")
 
     @app.route("/")
